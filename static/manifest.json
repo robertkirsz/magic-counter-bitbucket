@@ -1,6 +1,6 @@
 {
-  "name": "magic-counter",
-  "short_name": "magic-counter",
+  "name": "Magic Counter",
+  "short_name": "Magic Counter",
   "icons": [
     {
       "src": "/static/img/icons/android-chrome-192x192.png",
