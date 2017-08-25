@@ -2,12 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from '@/store'
 
-import CounterScreen from '@/routes/CounterScreen'
-import DiceScreen from '@/routes/DiceScreen'
-import StatisticsScreen from '@/routes/StatisticsScreen'
-import SignIn from '@/routes/SignIn'
-import SignUp from '@/routes/SignUp'
-import LiveGame from '@/routes/LiveGame'
+const CounterScreen = cb => require(['@/routes/CounterScreen.vue'], cb)
+const DiceScreen = cb => require(['@/routes/DiceScreen.vue'], cb)
+const StatisticsScreen = cb => require(['@/routes/StatisticsScreen.vue'], cb)
+const SignIn = cb => require(['@/routes/SignIn.vue'], cb)
+const SignUp = cb => require(['@/routes/SignUp.vue'], cb)
+const LiveGame = cb => require(['@/routes/LiveGame.vue'], cb)
 
 Vue.use(Router)
 
