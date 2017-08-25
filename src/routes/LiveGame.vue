@@ -55,6 +55,11 @@ export default {
       if (this.userIsOwner) this.destroyLiveGame()
       else this.leaveLiveGame()
     }
+  },
+  watch: {
+    userSignedIn (nextVal, prevVal) {
+      if (prevVal && !nextVal) this.$router.push('/sign-in')
+    }
   }
 }
 </script>

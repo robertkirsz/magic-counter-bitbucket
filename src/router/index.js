@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import store from '@/store'
 
 import CounterScreen from '@/routes/CounterScreen'
 import DiceScreen from '@/routes/DiceScreen'
@@ -42,7 +43,10 @@ export default new Router({
     {
       path: '/live',
       name: 'LiveGame',
-      component: LiveGame
+      component: LiveGame,
+      beforeEnter: (to, from, next) => {
+        next(store.state.session.signedIn)
+      }
     }
   ]
 })
