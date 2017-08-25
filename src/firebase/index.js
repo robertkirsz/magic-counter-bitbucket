@@ -42,95 +42,95 @@ export const firebaseGetData = (table, id) => (
 )
 
 // Generic 'set' function
-export const firebaseSetData = (table, id, data) => (
+export const firebaseSetData = (table, id, data) =>
   database
     .ref(table)
     .child(id)
     .set(data)
     .then(() => ({ success: true }))
     .catch(response => ({ error: response.message }))
-)
 
 // Generic 'push' function
-export const firebasePushData = (table, data) => (
+export const firebasePushData = (table, data) =>
   database
     .ref(table)
     .push()
     .set(data)
     .then(() => ({ success: true }))
     .catch(response => ({ error: response.message }))
-)
 
 // Generic 'update' function
-export const firebaseUpdateData = (table, id, data) => (
+export const firebaseUpdateData = (table, id, data) =>
   database
     .ref(table)
     .child(id)
     .update(data)
     .then(() => ({ success: true }))
     .catch(response => ({ error: response.message }))
-)
 
 // 'On' listener
-export const firebaseListener = (table, id, callback) => (
+export const firebaseListener = (table, id, callback) =>
   database
     .ref(table)
     .child(id)
     .on('value', snapshot => callback(snapshot.val()))
-)
 
 // ---------- AUTHENTICATION ----------
 
 // Generic email and password sign in
-export const firebaseSignIn = (email, password) => (
-  auth.signInWithEmailAndPassword(email, password)
+export const firebaseSignIn = (email, password) =>
+  auth
+    .signInWithEmailAndPassword(email, password)
     .then(response => ({ success: true, id: response.uid, response }))
     .catch(response => ({ error: true, response }))
-)
 
 // Generic email and password sign up
-export const firebaseSignUp = (email, password) => (
-  auth.createUserWithEmailAndPassword(email, password)
+export const firebaseSignUp = (email, password) =>
+  auth
+    .createUserWithEmailAndPassword(email, password)
     .then(response => ({ success: true, id: response.uid }))
     .catch(response => ({ error: true, response }))
-)
 
 // Sign out
-export const firebaseSignOut = () => (
-  auth.signOut()
+export const firebaseSignOut = () =>
+  auth
+    .signOut()
     .then(() => ({ success: true }))
     .catch(response => ({ error: response.message }))
-)
 
 // Provider sign in
-export const firebaseProviderSignIn = (providerName) => (
-  auth.signInWithPopup(providers[providerName])
+export const firebaseProviderSignIn = providerName =>
+  auth
+    .signInWithPopup(providers[providerName])
     .then(response => ({ success: true, user: response.user }))
     .catch(response => ({ error: response.message }))
-)
 
 // ---------- PROFILE ----------
 // TODO: check if needed
-export const updateProfile = userProfile => (
-  auth.currentUser.updateProfile({
-    displayName: userProfile.displayName,
-    photoURL: userProfile.photoURL
-  })
-    .then(() => {
-      console.log('Success')
-    }, error => {
-      console.log('Error', error)
+export const updateProfile = userProfile =>
+  auth.currentUser
+    .updateProfile({
+      displayName: userProfile.displayName,
+      photoURL: userProfile.photoURL
     })
-)
+    .then(
+      () => {
+        console.log('Success')
+      },
+      error => {
+        console.log('Error', error)
+      }
+    )
 
-export const updateEmail = email => (
-  auth.currentUser.updateEmail(email)
-    .then(() => {
+export const updateEmail = email =>
+  auth.currentUser.updateEmail(email).then(
+    () => {
       console.log('Success')
-    }, error => {
+    },
+    error => {
       console.log('Error', error)
-    })
-)
+    }
+  )
 
 // ---------- USER DATA UPDATING ----------
 
