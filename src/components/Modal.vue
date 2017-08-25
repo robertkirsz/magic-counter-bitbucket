@@ -65,7 +65,7 @@ export default {
     height: 100%;
     background: rgba(0, 0, 0, .5);
     z-index: 9999;
-    transition: opacity .3s ease;
+    transition: opacity .3s;
     &.error { background: rgba(200, 0, 0, .5); }
     &.center * { text-align: center; }
   }

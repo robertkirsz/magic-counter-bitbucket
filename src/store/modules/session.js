@@ -167,6 +167,7 @@ const actions = {
       })
     } else {
       commit(types.SIGN_IN_SUCCESS)
+      commit(types.HIDE_ERRORS_OF_TYPE, 'auth/')
     }
   },
   async signUp ({ commit, getters }, { email, password }) {
@@ -185,6 +186,7 @@ const actions = {
       })
     } else {
       commit(types.SIGN_UP_SUCCESS)
+      commit(types.HIDE_ERRORS_OF_TYPE, 'auth/')
     }
   },
   async signOut ({ commit, getters }) {

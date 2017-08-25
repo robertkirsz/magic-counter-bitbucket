@@ -30,8 +30,8 @@ const getters = {
   // TODO: check wha two values below appear in Vue devtools store
   newestError: ({ all }) => moment.max(all.map(err => err.time)),
   oldestError: ({ all }) => moment.min(all.map(err => err.time)),
-  errorsOfType: ({ all }) => (type) => all.filter(err => _startsWith(err.type, type)),
-  firstErrorOfType: (state, { errorsOfType }) => (type) => errorsOfType(type)[0] || {},
+  errorsOfType: ({ all }) => type => all.filter(err => _startsWith(err.type, type)),
+  firstErrorOfType: (state, { errorsOfType }) => type => errorsOfType(type)[0] || {},
   isEmailError: (state, { firstError }) => _includes(['auth/invalid-email', 'auth/email-already-in-use'], firstError.type),
   isPasswordError: (state, { firstError }) => _includes(['auth/wrong-password', 'auth/weak-password'], firstError.type)
 }
@@ -63,10 +63,7 @@ const actions = {
     // TODO: log errors in the database
 
     if (_isNumber(error.autohide)) {
-      setTimeout(
-        commit(types.HIDE_ERROR, error.type),
-        error.autohide
-      )
+      setTimeout(commit(types.HIDE_ERROR, error.type), error.autohide)
     }
   },
   hideError ({ commit }) {

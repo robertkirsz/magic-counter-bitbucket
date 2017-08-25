@@ -19,6 +19,7 @@
       />
     </div>
     <div v-if="liveGame">
+      <p>Game name: {{ liveGame.name }}</p>
       <p>Owner: {{ liveGame.owner.name }}</p>
       <p>Players:</p>
       <p v-for="player in liveGame.players" :key="player.id">

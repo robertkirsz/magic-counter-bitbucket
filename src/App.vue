@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <spinner-handler />
     <router-view />
     <user-menu-button />
     <error-modal />
@@ -11,10 +12,11 @@
 import { auth } from '@/firebase'
 import UserMenuButton from '@/components/UserMenuButton'
 import ErrorModal from '@/components/ErrorModal'
+import SpinnerHandler from '@/components/SpinnerHandler'
 
 export default {
   name: 'App',
-  components: { UserMenuButton, ErrorModal },
+  components: { UserMenuButton, ErrorModal, SpinnerHandler },
   mounted () {
     this.authChange()
   },

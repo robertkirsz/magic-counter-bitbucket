@@ -14,8 +14,9 @@
       <md-button
         type="submit"
         class="md-raised md-primary"
-        v-text="signInButtonText"
-      />
+      >
+      Sign in
+    </md-button>
     </form>
     <p>Or continue with</p>
     <social-buttons @providerChosen="signInWithProvider" />
@@ -41,20 +42,19 @@ export default {
     }
   },
   computed: {
-    signedIn () {
-      return this.$store.state.session.signedIn
-    },
+    signedIn () { return this.$store.state.session.signedIn },
     ...mapGetters(['firstErrorOfType', 'isEmailError', 'isPasswordError']),
     error () {
+      // TODO: clea after route change
       return this.firstErrorOfType('auth/')
-    },
-    signInButtonText () {
-      return this.$store.state.session.signingIn ? 'Signing...' : 'Sign in' // TODO: replace with spinner
     }
   },
   methods: {
     signIn () {
-      this.$store.dispatch('signIn', { email: this.email, password: this.password })
+      this.$store.dispatch('signIn', {
+        email: this.email,
+        password: this.password
+      })
     },
     signInWithProvider (providerName) {
       this.$store.dispatch('signInWithProvider', { providerName })

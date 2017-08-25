@@ -14,8 +14,8 @@
       <md-button
         type="submit"
         class="md-raised md-primary"
-        v-text="signUpButtonText"
       />
+        Sign up
       </md-button>
     </form>
     <p>
@@ -45,9 +45,6 @@ export default {
     ...mapGetters(['firstErrorOfType', 'isEmailError', 'isPasswordError']),
     error () {
       return this.firstErrorOfType('auth/')
-    },
-    signUpButtonText () {
-      return this.$store.state.session.signingUp ? 'Signing...' : 'Sign up' // TODO: replace with spinner
     }
   },
   methods: {
