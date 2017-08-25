@@ -1,22 +1,15 @@
 import firebase from 'firebase'
 
 const prodConfig = {
-  apiKey: 'AIzaSyDwDacwAuGy4LxSOJnJKgVDOBSgHQm6PgU',
-  authDomain: 'mtg-collection-cd492.firebaseapp.com',
-  databaseURL: 'https://mtg-collection-cd492.firebaseio.com',
-  projectId: 'mtg-collection-cd492',
-  storageBucket: 'mtg-collection-cd492.appspot.com',
-  messagingSenderId: '378575387948'
+  apiKey: 'AIzaSyC0Y6xEG_TSS4ksLxL1RZaOl6m79MRYFtQ',
+  authDomain: 'magic-counter-95d70.firebaseapp.com',
+  databaseURL: 'https://magic-counter-95d70.firebaseio.com',
+  projectId: 'magic-counter-95d70',
+  storageBucket: 'magic-counter-95d70.appspot.com',
+  messagingSenderId: '457190092071'
 }
 
-const devConfig = {
-  apiKey: 'AIzaSyACgpq8QACoKVO_QpZOFz3ugf-fDWQnyN4',
-  authDomain: 'magic-card-manager-dev.firebaseapp.com',
-  databaseURL: 'https://magic-card-manager-dev.firebaseio.com',
-  projectId: 'magic-card-manager-dev',
-  storageBucket: 'magic-card-manager-dev.appspot.com',
-  messagingSenderId: '295694560951'
-}
+const devConfig = prodConfig
 
 const config = process.env.NODE_ENV === 'production' ? prodConfig : devConfig
 
