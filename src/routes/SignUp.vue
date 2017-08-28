@@ -14,7 +14,7 @@
       <md-button
         type="submit"
         class="md-raised md-primary"
-      />
+      >
         Sign up
       </md-button>
     </form>

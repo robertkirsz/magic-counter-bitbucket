@@ -4,6 +4,7 @@
     <router-view />
     <user-menu-button />
     <error-modal />
+    <redirector />
   </div>
 </template>
 
@@ -13,18 +14,19 @@ import { auth } from '@/firebase'
 import UserMenuButton from '@/components/UserMenuButton'
 import ErrorModal from '@/components/ErrorModal'
 import SpinnerHandler from '@/components/SpinnerHandler'
+import Redirector from '@/components/Redirector'
 
 export default {
   name: 'App',
-  components: { UserMenuButton, ErrorModal, SpinnerHandler },
+  components: { UserMenuButton, ErrorModal, SpinnerHandler, Redirector },
   mounted () {
     this.authChange()
   },
   methods: {
     authChange () {
       // When user's authentication status changes...
-      auth.onAuthStateChanged(async (firebaseUser) => {
-        this.$store.dispatch('firebaseAuthentication', firebaseUser)
+      auth.onAuthStateChanged(firebaseUser => {
+        this.$store.dispatch('firebaseAuthenticate', firebaseUser)
       })
     }
   }

@@ -32,6 +32,8 @@ const getters = {
   oldestError: ({ all }) => moment.min(all.map(err => err.time)),
   errorsOfType: ({ all }) => type => all.filter(err => _startsWith(err.type, type)),
   firstErrorOfType: (state, { errorsOfType }) => type => errorsOfType(type)[0] || {},
+  // TODO: check if isUserError works properly
+  isUserError: (state, { firstError }) => _startsWith(firstError.type, 'user/'),
   isEmailError: (state, { firstError }) => _includes(['auth/invalid-email', 'auth/email-already-in-use'], firstError.type),
   isPasswordError: (state, { firstError }) => _includes(['auth/wrong-password', 'auth/weak-password'], firstError.type)
 }

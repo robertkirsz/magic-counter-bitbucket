@@ -67,13 +67,16 @@ const mutations = {
 
 // TODO: on refresh user should rejoin his game
 // TODO: perhaps if user leaves his game, ownership shoul be passed on to another player?
-// TODO: add "off" listener when user leaves or destroys a game
+// TODO: add "off" firebase listener when user leaves or destroys a game, or a game gets
+// destroyed for a joined user
 // localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
 // let savedGameState = JSON.parse(localStorage.getItem('MtgCounterGameState'))
-
+// BUG: join a game, destroy it as the owner, create game with the same name, joined user will automatically rejoin
+// TODO: if user has 'liveGame' stored in its object, but the game got removed (for example manually from the database),
+//       clear 'liveGame' property when user logs in (it should propably be done on the server)
 const actions = {
   rejoinLiveGame () {},
-  async createLiveGame ({ commit, getters }, gameName) {
+  async createLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
     if (state.gameData) return
 
@@ -89,10 +92,10 @@ const actions = {
     }
 
     // Check if game with that name already exists in the database
-    const exists = await firebaseGetData('LiveGames', gameName)
+    const existingGame = await firebaseGetData('LiveGames', gameName)
 
     // If yes, show error and stop
-    if (exists.success) {
+    if (existingGame.success) {
       commit(types.CREATE_LIVE_GAME_FAIL)
       commit(types.SHOW_ERROR, { message: 'Game with that name already exists' })
       return
@@ -101,7 +104,13 @@ const actions = {
     // Add game data to the database
     await firebaseSetData('LiveGames', gameName, gameData)
       // Finish request
-      .then(response => commit(types.CREATE_LIVE_GAME_SUCCESS, response))
+      .then(response => {
+        // TODO: update user's data, set flag that he's an owner of the game
+        // will be used when refreshing the page
+        commit(types.CREATE_LIVE_GAME_SUCCESS, response)
+        // TODO: do this on the server?
+        dispatch('updateUser', { liveGame: gameName })
+      })
       // Show error if thrown
       .catch(error => {
         commit(types.CREATE_LIVE_GAME_FAIL)
@@ -111,7 +120,7 @@ const actions = {
     // Add database listener on that game data
     firebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
   },
-  async joinLiveGame ({ commit, getters }, gameName) {
+  async joinLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
     if (state.gameData) return
 
@@ -119,44 +128,50 @@ const actions = {
     commit(types.JOIN_LIVE_GAME_REQUEST)
 
     // Check if game with that name exists in the database
-    const exists = await firebaseGetData('LiveGames', gameName)
+    const existingGame = await firebaseGetData('LiveGames', gameName)
 
     // If no, show error and stop
-    if (exists.error) {
+    if (existingGame.error) {
       commit(types.JOIN_LIVE_GAME_FAIL)
       commit(types.SHOW_ERROR, { message: 'Game not found' })
       return
     }
 
     // Prepare game data (add user to the "players" array)
-    const gameData = {
-      ...exists.data,
-      players: [
-        ...exists.data.players,
-        { ...getters.getUser, life: 20 }
-      ]
-    }
+    const playerExists = !!existingGame.data.players.find(player => player.uid === getters.getUser.uid)
+    const players = playerExists
+      ? [...existingGame.data.players]
+      : [...existingGame.data.players, { ...getters.getUser, life: 20 }]
+    const gameData = { ...existingGame.data, players }
 
     // Update game data in the database
     await firebaseUpdateData('LiveGames', gameName, gameData)
       // Finish request
-      .then(response => commit(types.CREATE_LIVE_GAME_SUCCESS, response))
+      .then(response => {
+        // TODO: update user's data, set flag that he joined a game
+        // will be used when refreshing the page
+        commit(types.JOIN_LIVE_GAME_SUCCESS, response)
+        // TODO: do this on the server?
+        if (!playerExists) dispatch('updateUser', { liveGame: gameName })
+      })
       // Show error if thrown
       .catch(error => {
-        commit(types.CREATE_LIVE_GAME_FAIL)
-        commit(types.SHOW_ERROR, { message: 'Error while creating a game: ' + error })
+        commit(types.JOIN_LIVE_GAME_FAIL)
+        commit(types.SHOW_ERROR, { message: 'Error while joining the game: ' + error })
       })
 
     // Add database listener on that game data
     firebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
   },
-  async destroyLiveGame ({ commit, state, getters }) {
+  async destroyLiveGame ({ commit, state, getters, dispatch }) {
     // Stop if there is no game data or if the user is not that game's owner
     if (!state.gameData || !getters.userIsOwner) return
 
     commit(types.DESTROY_LIVE_GAME_REQUEST)
     await firebaseSetData('LiveGames', state.gameData.name, null)
     commit(types.DESTROY_LIVE_GAME_SUCCESS)
+    // TODO: do this on the server?
+    dispatch('updateUser', { liveGame: null })
   },
   leaveLiveGame ({ commit, state, getters, rootGetters }) {
     // Stop if there is no game data or if the user is that game's owner

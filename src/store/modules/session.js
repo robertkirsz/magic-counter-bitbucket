@@ -1,7 +1,8 @@
 import Vue from 'vue'
+import _get from 'lodash/get'
+
 import * as types from '@/store/mutation-types'
 import { firebaseGetData, updateUserData, firebaseSignIn, firebaseSignUp, firebaseSignOut, firebaseProviderSignIn } from '@/firebase'
-import _get from 'lodash/get'
 
 const debug = true
 
@@ -12,7 +13,8 @@ const getInitialState = () => ({
   signingOut: false,
   signingInProvider: false,
   signingInProviderName: '',
-  firebaseAuthentication: false,
+  firebaseAuthenticating: false,
+  firebaseAuthenticated: false,
   // STATUSES
   signedIn: false,
   signedUp: false,
@@ -76,18 +78,19 @@ const mutations = {
     state.signingInProviderName = ''
   },
   [types.FIREBASE_AUTHENTICATION_REQUEST] (state) {
-    state.firebaseAuthentication = true
+    state.firebaseAuthenticating = true
   },
   [types.FIREBASE_AUTHENTICATION_RESPONSE] (state) {
-    state.firebaseAuthentication = false
+    state.firebaseAuthenticating = false
+    state.firebaseAuthenticated = true
   },
-  [types.SAVE_USER] (state) {
+  [types.UPDATE_USER_SUCCESS] (state) {
     state.signedIn = true
   }
 }
 
 const actions = {
-  async firebaseAuthentication ({ commit }, firebaseUser) {
+  async firebaseAuthenticate ({ commit, dispatch }, firebaseUser) {
     if (debug) console.info('Authentication state has changed')
     // Show spinner
     commit(types.FIREBASE_AUTHENTICATION_REQUEST)
@@ -125,10 +128,6 @@ const actions = {
         // Check if user is an admin
         const userIsAdmin = await firebaseGetData('Admins', uid)
         if (userIsAdmin.success) user.admin = true
-
-        // Apply user's setting if he has any stored
-        _get(usersDataFromDatabase, 'data.settings') &&
-          commit(types.LOAD_USER_SETTINGS, usersDataFromDatabase.data.settings)
         */
       }
 
@@ -136,12 +135,11 @@ const actions = {
       const updateUserDataResponse = await updateUserData(user)
       if (updateUserDataResponse.success) {
         if (debug) console.info('User\'s data:', user)
-        commit(types.SAVE_USER, user)
+        commit(types.UPDATE_USER_SUCCESS, user)
+        // Fetch live game's data if user takes part in one
+        if (user.liveGame) dispatch('joinLiveGame', user.liveGame)
       } else if (updateUserDataResponse.error) {
-        commit(types.SHOW_ERROR, {
-          type: 'firebase/auth',
-          message: updateUserDataResponse.error
-        })
+        commit(types.SHOW_ERROR, { type: 'firebase/auth', message: updateUserDataResponse.error })
       }
 
     // If user's not logged in or logged out...

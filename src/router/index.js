@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+
 import store from '@/store'
 
 const CounterScreen = cb => require(['@/routes/CounterScreen.vue'], cb)
@@ -17,6 +18,7 @@ export default new Router({
       path: '/',
       name: 'CounterScreen',
       component: CounterScreen,
+      beforeEnter: (to, from, next) => { next(!store.state.liveGame.gameData) },
       children: [
         {
           path: 'dice',
@@ -33,20 +35,20 @@ export default new Router({
     {
       path: '/sign-in',
       name: 'SignIn',
-      component: SignIn
+      component: SignIn,
+      beforeEnter: (to, from, next) => { next(!store.state.session.signedIn) }
     },
     {
       path: '/sign-up',
       name: 'SignUp',
-      component: SignUp
+      component: SignUp,
+      beforeEnter: (to, from, next) => { next(!store.state.session.signedIn) }
     },
     {
       path: '/live',
       name: 'LiveGame',
       component: LiveGame,
-      beforeEnter: (to, from, next) => {
-        next(store.state.session.signedIn)
-      }
+      beforeEnter: (to, from, next) => { next(store.state.session.signedIn) }
     }
   ]
 })

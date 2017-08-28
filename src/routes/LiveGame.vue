@@ -1,72 +1,42 @@
 <template>
-  <div v-if="userSignedIn" class="content">
-    <div v-if="!liveGame">
+  <div class="content">
+    <live-game-screen v-if="liveGame" />
+    <div v-else>
       <md-input-container>
-        <md-input v-model="createGameName"></md-input>
+        <md-input v-model="createGameName" />
       </md-input-container>
       <md-button
         class="md-raised md-primary"
         @click.native="createLiveGame(createGameName)"
+        :disabled="!createGameName"
         v-text="'Create'"
       />
       <md-input-container>
-        <md-input v-model="joinGameName"></md-input>
+        <md-input v-model="joinGameName" />
       </md-input-container>
       <md-button
         class="md-raised md-primary"
         @click.native="joinLiveGame(joinGameName)"
+        :disabled="!joinGameName"
         v-text="'Join'"
-      />
-    </div>
-    <div v-if="liveGame">
-      <p>Game name: {{ liveGame.name }}</p>
-      <p>Owner: {{ liveGame.owner.name }}</p>
-      <p>Players:</p>
-      <p v-for="player in liveGame.players" :key="player.id">
-        {{ player.name }} {{ player.life }}
-      </p>
-      <md-button
-        class="md-raised md-accent"
-        @click.native="exitGame"
-        v-text="userIsOwner ? 'Destroy' : 'Leave'"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
+import LiveGameScreen from '@/components/LiveGameScreen'
 
 export default {
   name: 'LiveGame',
-  data: () => ({
-    createGameName: '',
-    joinGameName: ''
-  }),
-  computed: {
-    ...mapState({
-      liveGame: state => state.liveGame.gameData,
-      userSignedIn: state => state.session.signedIn
-    }),
-    ...mapGetters(['userIsOwner'])
-  },
-  methods: {
-    ...mapActions(['createLiveGame', 'joinLiveGame', 'destroyLiveGame', 'leaveLiveGame']),
-    exitGame () {
-      if (this.userIsOwner) this.destroyLiveGame()
-      else this.leaveLiveGame()
-    }
-  },
-  watch: {
-    userSignedIn (nextVal, prevVal) {
-      if (prevVal && !nextVal) this.$router.push('/sign-in')
-    }
-  }
+  components: { LiveGameScreen },
+  data: () => ({ createGameName: '', joinGameName: '' }),
+  computed: mapState({ liveGame: state => state.liveGame.gameData }),
+  methods: mapActions(['createLiveGame', 'joinLiveGame'])
 }
 </script>
 
-<style lang="scss" scoped>
-  .content {
-    padding: 8px;
-  }
+<style scoped>
+  .content { padding: 8px; }
 </style>

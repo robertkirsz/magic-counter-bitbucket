@@ -1,14 +1,18 @@
 import Vue from 'vue'
+
+import { firebaseUpdateData } from '@/firebase'
 import * as types from '@/store/mutation-types'
 
 const getInitialState = () => ({
-  uid: '',
+  uid: null,
+  displayName: null,
+  email: null,
+  photoURL: null,
   createdOn: null,
+  updatedOn: null,
   lastLogin: null,
-  displayName: '',
-  email: '',
-  photoURL: '',
-  settings: {}
+  settings: null,
+  liveGame: null
 })
 
 const state = getInitialState()
@@ -22,26 +26,39 @@ const getters = {
 }
 
 const mutations = {
-  [types.SAVE_USER] (state, user) {
-    state.uid = user.uid
-    state.displayName = user.displayName
-    state.email = user.email
-    state.photoURL = user.photoURL
-    state.createdOn = user.createdOn
-    state.lastLogin = user.lastLogin
-    state.authRequestPending = false
-    state.signedIn = true
+  [types.UPDATE_USER_REQUEST] () {},
+  [types.UPDATE_USER_SUCCESS] (state, user) {
+    for (let f in state) {
+      if (user[f] !== undefined) Vue.set(state, f, user[f])
+    }
   },
-  [types.LOAD_USER_SETTINGS] (state, settings) {
-    state.settings = settings
-  },
+  [types.UPDATE_USER_FAIL] () {},
   [types.SIGN_OUT_SUCCESS] (state) {
     const reset = getInitialState()
     for (let f in state) Vue.set(state, f, reset[f])
   }
 }
 
-const actions = {}
+const actions = {
+  async updateUser ({ commit, state }, data) {
+    commit(types.UPDATE_USER_REQUEST)
+
+    const user = {
+      ...state,
+      ...data,
+      updatedOn: Date.now()
+    }
+
+    const updateUserResponse = await firebaseUpdateData('Users', user.uid, user)
+
+    if (updateUserResponse.success) {
+      commit(types.UPDATE_USER_SUCCESS, user)
+    } else if (updateUserResponse.error) {
+      commit(types.UPDATE_USER_FAIL)
+      commit(types.SHOW_ERROR, { type: 'user/update', message: updateUserResponse.error })
+    }
+  }
+}
 
 export default {
   state,

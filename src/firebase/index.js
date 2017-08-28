@@ -134,6 +134,7 @@ export const updateEmail = email =>
 
 // ---------- USER DATA UPDATING ----------
 
+// TODO: perhaps I should remove it and make a call directly in the Vuex module
 export const updateUserData = user => {
   if (user.uid) return firebaseUpdateData('Users', user.uid, user)
 }
