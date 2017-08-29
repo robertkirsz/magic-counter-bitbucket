@@ -10,7 +10,6 @@
 
 <script>
 // TODO: remove "Animated.css" when it's no longer needed
-import { auth } from '@/firebase'
 import UserMenuButton from '@/components/UserMenuButton'
 import ErrorModal from '@/components/ErrorModal'
 import SpinnerHandler from '@/components/SpinnerHandler'
@@ -18,18 +17,7 @@ import Redirector from '@/components/Redirector'
 
 export default {
   name: 'App',
-  components: { UserMenuButton, ErrorModal, SpinnerHandler, Redirector },
-  mounted () {
-    // this.authChange()
-  },
-  methods: {
-    authChange () {
-      // When user's authentication status changes...
-      auth.onAuthStateChanged(firebaseUser => {
-        this.$store.dispatch('firebaseAuthenticate', firebaseUser)
-      })
-    }
-  }
+  components: { UserMenuButton, ErrorModal, SpinnerHandler, Redirector }
 }
 </script>
 

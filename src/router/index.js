@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import { auth } from '@/firebase'
 import store from '@/store'
+import { auth } from '@/firebase'
+import { log } from '@/utils'
 
 const CounterScreen = cb => require(['@/routes/CounterScreen.vue'], cb)
 const DiceScreen = cb => require(['@/routes/DiceScreen.vue'], cb)
@@ -19,7 +20,7 @@ export default new Router({
       path: '/',
       name: 'CounterScreen',
       component: CounterScreen,
-      beforeEnter: (to, from, next) => { next(!store.state.liveGame.gameData) },
+      beforeEnter: (to, from, next) => checkAuth(to, from, next),
       children: [
         {
           path: 'dice',
@@ -37,73 +38,50 @@ export default new Router({
       path: '/sign-in',
       name: 'SignIn',
       component: SignIn,
-      beforeEnter: (to, from, next) => redirectIfAuth(to, from, next)
+      beforeEnter: (to, from, next) => allowIfAuth(to, from, next)
     },
     {
       path: '/sign-up',
       name: 'SignUp',
       component: SignUp,
-      beforeEnter: (to, from, next) => redirectIfAuth(to, from, next)
+      beforeEnter: (to, from, next) => allowIfAuth(to, from, next)
     },
     {
       path: '/live',
       name: 'LiveGame',
       component: LiveGame,
-      beforeEnter: (to, from, next) => redirectIfNotAuth(to, from, next)
+      beforeEnter: (to, from, next) => allowIfUnauth(to, from, next)
     }
   ]
 })
 
-// TODO: must always fire at the app launch
-const addAuthChangeListener = () => new Promise((resolve, reject) => {
-  console.warn('addAuthChangeListener')
-  auth.onAuthStateChanged(firebaseUser => {
-    store.dispatch('firebaseAuthenticate', firebaseUser)
-    if (firebaseUser) resolve(true)
-    else reject(false)
+const addAuthChangeListener = () =>
+  new Promise(resolve => {
+    if (store.state.session.firebaseAuthenticated) {
+      resolve(store.state.session.signedIn)
+      return
+    }
+
+    log('beforeEnter: addAuthChangeListener request')
+    auth.onAuthStateChanged(firebaseUser => {
+      log('beforeEnter: addAuthChangeListener response')
+      store.dispatch('firebaseAuthenticate', firebaseUser)
+      resolve(!!firebaseUser)
+    })
   })
-})
 
-const redirectIfNotAuth = (to, from, next) => {
-  console.warn('redirectIfNotAuth')
-  let signedIn = store.state.session.signedIn
-
-  if (!store.state.session.firebaseAuthenticated) {
-    console.warn('waiting...')
-    addAuthChangeListener()
-      .then(() => {
-        console.log('ok')
-        next()
-      })
-      .catch(() => {
-        console.log('no')
-        next(false)
-      })
-  } else {
-    if (signedIn) console.log('ok')
-    else console.log('no')
-    next(signedIn)
-  }
+const checkAuth = async (to, from, next) => {
+  log(`beforeEnter: checkAuth - ${from.name} => ${to.name}`)
+  await addAuthChangeListener()
+  next()
 }
 
-const redirectIfAuth = (to, from, next) => {
-  console.warn('redirectIfAuth')
-  let signedIn = store.state.session.signedIn
+const allowIfUnauth = async (to, from, next) => {
+  log(`beforeEnter: allowIfUnauth - ${from.name} => ${to.name}`)
+  next(await addAuthChangeListener())
+}
 
-  if (!store.state.session.firebaseAuthenticated) {
-    console.warn('waiting...')
-    addAuthChangeListener()
-      .then(() => {
-        console.log('ok')
-        next()
-      })
-      .catch(() => {
-        console.log('no')
-        next(false)
-      })
-  } else {
-    if (!signedIn) console.log('ok')
-    else console.log('no')
-    next(!signedIn)
-  }
+const allowIfAuth = async (to, from, next) => {
+  log(`beforeEnter: allowIfAuth - ${from.name} => ${to.name}`)
+  next(!await addAuthChangeListener())
 }

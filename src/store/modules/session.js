@@ -13,7 +13,7 @@ const getInitialState = () => ({
   signingOut: false,
   signingInProvider: false,
   signingInProviderName: '',
-  firebaseAuthenticating: false,
+  firebaseAuthenticating: true,
   // Statuses
   signedIn: false,
   signedUp: false,
@@ -59,7 +59,6 @@ const mutations = {
     state.signingOut = true
   },
   [types.SIGN_OUT_SUCCESS] (state) {
-    // TODO: check if it's okay
     const reset = {
       ...getInitialState(),
       firebaseAuthenticating: false,
