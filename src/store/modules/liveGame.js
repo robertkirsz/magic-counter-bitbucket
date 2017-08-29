@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 import * as types from '@/store/mutation-types'
 import { firebaseGetData, firebaseSetData, firebaseUpdateData, firebaseListener } from '@/firebase'
 
@@ -65,8 +66,7 @@ const mutations = {
   }
 }
 
-// TODO: on refresh user should rejoin his game
-// TODO: perhaps if user leaves his game, ownership shoul be passed on to another player?
+// TODO: perhaps if user leaves his game, ownership should be passed on to another player?
 // TODO: add "off" firebase listener when user leaves or destroys a game, or a game gets
 // destroyed for a joined user
 // localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
@@ -75,7 +75,6 @@ const mutations = {
 // TODO: if user has 'liveGame' stored in its object, but the game got removed (for example manually from the database),
 //       clear 'liveGame' property when user logs in (it should propably be done on the server)
 const actions = {
-  rejoinLiveGame () {},
   async createLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
     if (state.gameData) return

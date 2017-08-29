@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
-import { firebaseUpdateData } from '@/firebase'
 import * as types from '@/store/mutation-types'
+import { firebaseUpdateData } from '@/firebase'
 
 const getInitialState = () => ({
   uid: null,
@@ -33,6 +33,7 @@ const mutations = {
     }
   },
   [types.UPDATE_USER_FAIL] () {},
+  // External mutations
   [types.SIGN_OUT_SUCCESS] (state) {
     const reset = getInitialState()
     for (let f in state) Vue.set(state, f, reset[f])

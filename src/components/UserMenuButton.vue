@@ -40,9 +40,6 @@
 export default {
   name: 'UserMenu',
   computed: {
-    firebaseAuthenticating () {
-      return this.$store.state.session.firebaseAuthenticating
-    },
     signedIn () {
       return this.$store.state.session.signedIn
     },
@@ -50,7 +47,6 @@ export default {
       return this.$store.state.user
     },
     buttonIcon () {
-      if (this.firebaseAuthenticating) return 'fa fa-spinner fa-spin'
       if (this.signedIn) return 'fa fa-user'
       return 'fa fa-user-times'
     },

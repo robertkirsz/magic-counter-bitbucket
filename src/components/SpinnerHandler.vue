@@ -11,12 +11,13 @@
 export default {
   name: 'SpinnerHandler',
   computed: {
+    firebaseAuthenticating () { return this.$store.state.session.firebaseAuthenticating },
     signingIn () { return this.$store.state.session.signingIn },
     signingUp () { return this.$store.state.session.signingUp },
     signingInProvider () { return this.$store.state.session.signingInProvider },
-    loading () { return this.signingIn || this.signingUp || this.signingInProvider },
+    loading () { return this.firebaseAuthenticating || this.signingIn || this.signingUp || this.signingInProvider },
     semi () { return this.signingIn || this.signingUp || this.signingInProvider },
-    opaque () { return false },
+    opaque () { return this.firebaseAuthenticating },
     className () { return { opaque: this.opaque, semi: this.semi } }
   }
 }

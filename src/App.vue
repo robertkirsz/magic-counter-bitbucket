@@ -20,7 +20,7 @@ export default {
   name: 'App',
   components: { UserMenuButton, ErrorModal, SpinnerHandler, Redirector },
   mounted () {
-    this.authChange()
+    // this.authChange()
   },
   methods: {
     authChange () {

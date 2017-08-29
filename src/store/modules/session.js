@@ -7,20 +7,20 @@ import { firebaseGetData, updateUserData, firebaseSignIn, firebaseSignUp, fireba
 const debug = true
 
 const getInitialState = () => ({
-  // REQUESTS
+  // Requests
   signingIn: false,
   signingUp: false,
   signingOut: false,
   signingInProvider: false,
   signingInProviderName: '',
   firebaseAuthenticating: false,
-  firebaseAuthenticated: false,
-  // STATUSES
+  // Statuses
   signedIn: false,
   signedUp: false,
   signedOut: false,
   signedInProvider: false,
-  signedInProviderName: ''
+  signedInProviderName: '',
+  firebaseAuthenticated: false
 })
 
 const state = getInitialState()
@@ -30,6 +30,7 @@ const getters = {
 }
 
 const mutations = {
+  // Sign in
   [types.SIGN_IN_REQUEST] (state) {
     state.signingIn = true
   },
@@ -41,6 +42,7 @@ const mutations = {
     state.signedIn = false
     state.signingIn = false
   },
+  // Sign up
   [types.SIGN_UP_REQUEST] (state) {
     state.signingUp = true
   },
@@ -52,16 +54,23 @@ const mutations = {
     state.signedUp = false
     state.signingUp = false
   },
+  // Sign out
   [types.SIGN_OUT_REQUEST] (state) {
     state.signingOut = true
   },
   [types.SIGN_OUT_SUCCESS] (state) {
-    const reset = getInitialState()
+    // TODO: check if it's okay
+    const reset = {
+      ...getInitialState(),
+      firebaseAuthenticating: false,
+      firebaseAuthenticated: true
+    }
     for (let f in state) Vue.set(state, f, reset[f])
   },
   [types.SIGN_OUT_FAIL] (state) {
     state.signingOut = false
   },
+  // Provider
   [types.SIGN_IN_PROVIDER_REQUEST] (state, providerName) {
     state.signingInProvider = true
     state.signingInProviderName = providerName
@@ -77,15 +86,13 @@ const mutations = {
     state.signingInProvider = false
     state.signingInProviderName = ''
   },
+  // Firebase authentication
   [types.FIREBASE_AUTHENTICATION_REQUEST] (state) {
     state.firebaseAuthenticating = true
   },
   [types.FIREBASE_AUTHENTICATION_RESPONSE] (state) {
     state.firebaseAuthenticating = false
     state.firebaseAuthenticated = true
-  },
-  [types.UPDATE_USER_SUCCESS] (state) {
-    state.signedIn = true
   }
 }
 
@@ -123,19 +130,16 @@ const actions = {
           ...usersDataFromDatabase.data,
           lastLogin: now
         }
-
-        /* TODO
-        // Check if user is an admin
-        const userIsAdmin = await firebaseGetData('Admins', uid)
-        if (userIsAdmin.success) user.admin = true
-        */
       }
 
+      // TODO: this is weird, need to rethink this
       // Save user's data in Firebase and in store
       const updateUserDataResponse = await updateUserData(user)
+
       if (updateUserDataResponse.success) {
         if (debug) console.info('User\'s data:', user)
         commit(types.UPDATE_USER_SUCCESS, user)
+        commit(types.SIGN_IN_SUCCESS)
         // Fetch live game's data if user takes part in one
         if (user.liveGame) dispatch('joinLiveGame', user.liveGame)
       } else if (updateUserDataResponse.error) {
