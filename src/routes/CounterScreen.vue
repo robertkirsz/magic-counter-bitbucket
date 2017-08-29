@@ -20,31 +20,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
+import { backgroundColors, backgroundDirections } from '@/config'
 import Tiles from '@/components/layout/Tiles'
 import Player from '@/components/Player'
 import MainMenu from '@/components/MainMenu'
-
-const colors = {
-  white: ['#FC9700', '#FFE292'],
-  blue: ['#004394', '#009AD0'],
-  black: ['#4C0064', '#B3307E'],
-  red: ['#94001A', '#E7093C'],
-  green: ['#01662C', '#82B300'],
-  clear: ['hsl(0, 0%, 100%)', 'hsl(0, 0%, 100%)']
-}
-
-const directions = {
-  upToTwo: [
-    'top',
-    'bottom'
-  ],
-  moreThanTwo: [
-    'top right',
-    'bottom right',
-    'top left',
-    'bottom left'
-  ]
-}
 
 export default {
   name: 'CounterScreen',
@@ -58,7 +38,7 @@ export default {
 
       this.playersColors.forEach((color, index) => {
         if (color) {
-          backgroundImageValues += `, linear-gradient(to ${directions[direction][index]}, ${colors[color][0]}, ${colors[color][1]}, transparent ${spread})`
+          backgroundImageValues += `, linear-gradient(to ${backgroundDirections[direction][index]}, ${backgroundColors[color][0]}, ${backgroundColors[color][1]}, transparent ${spread})`
         }
       })
 
@@ -69,10 +49,10 @@ export default {
 </script>
 
 <style scoped>
-.counter-screen {
-  height: 100%;
-  background-position: center, left top;
-  background-size: cover, auto;
-  transition: filter 0.3s;
-}
+  .counter-screen {
+    height: 100%;
+    background-position: center, left top;
+    background-size: cover, auto;
+    transition: filter 0.3s;
+  }
 </style>

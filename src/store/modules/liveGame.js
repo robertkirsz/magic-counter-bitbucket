@@ -4,17 +4,24 @@ import * as types from '@/store/mutation-types'
 import { firebaseGetData, firebaseSetData, firebaseUpdateData, firebaseListener } from '@/firebase'
 
 const getInitialState = () => ({
+  // Requests
   creating: false,
   joining: false,
   destroying: false,
   leaving: false,
-  gameData: null
+  // Data
+  gameData: {
+    name: null,
+    owner: {},
+    players: [],
+    createdAt: null
+  }
 })
 
 const state = getInitialState()
 
 const getters = {
-  userIsOwner: (state, getters, rootState, rootGetters) => state.gameData && state.gameData.owner.id === rootGetters.getUser.id
+  userIsOwner: (state, getters, rootState, rootGetters) => state.gameData.owner.id === rootGetters.getUser.id
 }
 
 const mutations = {
