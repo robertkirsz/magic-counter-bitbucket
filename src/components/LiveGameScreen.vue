@@ -20,9 +20,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 export default {
   name: 'LiveGame',
   computed: {
-    ...mapState({
-      liveGame: state => state.liveGame.gameData
-    }),
+    ...mapState({ liveGame: state => state.liveGame }),
     ...mapGetters(['userIsOwner'])
   },
   methods: {

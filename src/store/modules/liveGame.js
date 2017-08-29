@@ -10,18 +10,17 @@ const getInitialState = () => ({
   destroying: false,
   leaving: false,
   // Data
-  gameData: {
-    name: null,
-    owner: {},
-    players: [],
-    createdAt: null
-  }
+  name: null,
+  owner: {},
+  players: [],
+  createdAt: null
 })
 
 const state = getInitialState()
 
 const getters = {
-  userIsOwner: (state, getters, rootState, rootGetters) => state.gameData.owner.id === rootGetters.getUser.id
+  isLiveGame: (state, getters) => state.name !== null && state.owner.id !== undefined,
+  userIsOwner: (state, getters, rootState, rootGetters) => state.owner.id === rootGetters.getUser.id
 }
 
 const mutations = {
@@ -69,10 +68,16 @@ const mutations = {
   },
   // Listener
   [types.SYNC_LIVE_GAME] (state, game) {
-    state.gameData = game
+    // TODO: maybe this can be wrote better? Some spread operator?
+    state.name = game.name
+    state.owner = game.owner
+    state.players = game.players
+    state.createdAt = game.createdAt
   }
 }
 
+// TODO: when user has game created and refreshes on http://localhost:8080/#/live, the screen
+//       with input is visible for a while
 // TODO: perhaps if user leaves his game, ownership should be passed on to another player?
 // TODO: add "off" firebase listener when user leaves or destroys a game, or a game gets
 // destroyed for a joined user
@@ -81,10 +86,11 @@ const mutations = {
 // BUG: join a game, destroy it as the owner, create game with the same name, joined user will automatically rejoin
 // TODO: if user has 'liveGame' stored in its object, but the game got removed (for example manually from the database),
 //       clear 'liveGame' property when user logs in (it should propably be done on the server)
+
 const actions = {
   async createLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
-    if (state.gameData) return
+    if (getters.isLiveGame) return
 
     // Start request
     commit(types.CREATE_LIVE_GAME_REQUEST)
@@ -111,8 +117,6 @@ const actions = {
     await firebaseSetData('LiveGames', gameName, gameData)
       // Finish request
       .then(response => {
-        // TODO: update user's data, set flag that he's an owner of the game
-        // will be used when refreshing the page
         commit(types.CREATE_LIVE_GAME_SUCCESS, response)
         // TODO: do this on the server?
         dispatch('updateUser', { liveGame: gameName })
@@ -128,7 +132,7 @@ const actions = {
   },
   async joinLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
-    if (state.gameData) return
+    if (getters.isLiveGame) return
 
     // Start request
     commit(types.JOIN_LIVE_GAME_REQUEST)
@@ -154,8 +158,6 @@ const actions = {
     await firebaseUpdateData('LiveGames', gameName, gameData)
       // Finish request
       .then(response => {
-        // TODO: update user's data, set flag that he joined a game
-        // will be used when refreshing the page
         commit(types.JOIN_LIVE_GAME_SUCCESS, response)
         // TODO: do this on the server?
         if (!playerExists) dispatch('updateUser', { liveGame: gameName })
@@ -171,29 +173,28 @@ const actions = {
   },
   async destroyLiveGame ({ commit, state, getters, dispatch }) {
     // Stop if there is no game data or if the user is not that game's owner
-    if (!state.gameData || !getters.userIsOwner) return
+    if (!getters.isLiveGame || !getters.userIsOwner) return
 
     commit(types.DESTROY_LIVE_GAME_REQUEST)
-    await firebaseSetData('LiveGames', state.gameData.name, null)
+    await firebaseSetData('LiveGames', state.name, null)
     commit(types.DESTROY_LIVE_GAME_SUCCESS)
     // TODO: do this on the server?
     dispatch('updateUser', { liveGame: null })
   },
   leaveLiveGame ({ commit, state, getters, rootGetters }) {
     // Stop if there is no game data or if the user is that game's owner
-    if (!state.gameData || getters.userIsOwner) return
+    if (!getters.isLiveGame || getters.userIsOwner) return
 
     // Start request
     commit(types.LEAVE_LIVE_GAME_REQUEST)
 
     // Prepare game data (remove user from the "players" array)
     const gameData = {
-      ...state.gameData,
-      players: state.gameData.players.filter(p => p.id !== rootGetters.getUser.id)
+      players: state.players.filter(p => p.id !== rootGetters.getUser.id)
     }
 
     // Update game data in the database
-    firebaseUpdateData('LiveGames', state.gameData.name, gameData)
+    firebaseUpdateData('LiveGames', state.name, gameData)
       // Finish request
       .then(response => commit(types.LEAVE_LIVE_GAME_SUCCESS, response))
       // Show error if thrown

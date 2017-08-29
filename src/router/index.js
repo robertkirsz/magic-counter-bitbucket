@@ -55,6 +55,7 @@ export default new Router({
   ]
 })
 
+// TODO: move somewhere else?
 const addAuthChangeListener = () =>
   new Promise(resolve => {
     if (store.state.session.firebaseAuthenticated) {

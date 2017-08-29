@@ -3,16 +3,15 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex'
+
 import { log } from '@/utils'
-import { mapState } from 'vuex'
 
 export default {
   name: 'Redirector',
   computed: {
-    ...mapState({
-      liveGame: state => state.liveGame.gameData,
-      userSignedIn: state => state.session.signedIn
-    })
+    ...mapGetters(['isLiveGame']),
+    ...mapState({ userSignedIn: state => state.session.signedIn })
   },
   methods: {
     go (name, message) {
@@ -26,8 +25,8 @@ export default {
     userSignedIn (next, prev) {
       if (prev && !next) this.go('SignIn', 'user logged-out')
     },
-    liveGame (next, prev) {
-      if (!prev && next) this.go('LiveGame', 'liveGame data added')
+    isLiveGame (next, prev) {
+      if (!prev && next) this.go('LiveGame', 'live game added')
     }
   }
 }

@@ -1,38 +1,29 @@
 <template>
   <div class="content">
-    <live-game-screen v-if="liveGame" />
+    <live-game-screen v-if="isLiveGame" />
     <div v-else>
       <md-input-container>
-        <md-input v-model="createGameName" />
+        <md-input placeholder="Game name" v-model="gameName" />
       </md-input-container>
-      <md-button
-        class="md-raised md-primary"
-        @click.native="createLiveGame(createGameName)"
-        :disabled="!createGameName"
-        v-text="'Create'"
-      />
-      <md-input-container>
-        <md-input v-model="joinGameName" />
-      </md-input-container>
-      <md-button
-        class="md-raised md-primary"
-        @click.native="joinLiveGame(joinGameName)"
-        :disabled="!joinGameName"
-        v-text="'Join'"
-      />
+      <md-button class="md-raised md-primary" @click="createLiveGame(gameName)" :disabled="!gameName">
+        Create
+      </md-button>
+      <md-button class="md-raised md-primary" @click="joinLiveGame(gameName)" :disabled="!gameName">
+        Join
+      </md-button>
     </div>
   </div>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import LiveGameScreen from '@/components/LiveGameScreen'
 
 export default {
   name: 'LiveGame',
   components: { LiveGameScreen },
-  data: () => ({ createGameName: '', joinGameName: '' }),
-  computed: mapState({ liveGame: state => state.liveGame.gameData }),
+  data: () => ({ gameName: '' }),
+  computed: mapGetters(['isLiveGame']),
   methods: mapActions(['createLiveGame', 'joinLiveGame'])
 }
 </script>
