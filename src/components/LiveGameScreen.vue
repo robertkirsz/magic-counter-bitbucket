@@ -18,7 +18,7 @@
 import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'LiveGame',
+  name: 'LiveGameScreen',
   computed: {
     ...mapState({ liveGame: state => state.liveGame }),
     ...mapGetters(['userIsOwner'])
