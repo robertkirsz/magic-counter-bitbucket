@@ -57,7 +57,7 @@ export default {
           label: 'Live game',
           icon: 'gamepad',
           iconType: 'fa',
-          action: () => this.$router.push('/live'),
+          action: () => this.$router.push({ name: 'LiveGame' }),
           hidden: !this.signedIn
         },
         {
@@ -65,7 +65,7 @@ export default {
           label: 'Sign in',
           icon: 'sign-in',
           iconType: 'fa',
-          action: () => this.$router.push('/sign-in'),
+          action: () => this.$router.push({ name: 'SignIn' }),
           hidden: this.signedIn
         },
         {

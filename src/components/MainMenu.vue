@@ -74,7 +74,7 @@ export default {
           title: 'Roll dice',
           icon: 'dice.svg',
           iconType: 'file',
-          action: () => this.$router.push('/dice'),
+          action: () => this.$router.push({ name: 'DiceScreen' }),
           closeOnClick: true,
           disabled: this.noPlayers
         },
@@ -94,7 +94,7 @@ export default {
           active: this.poisonCountersVisible,
           disabled: this.noPlayers
         }
-        // { icon: 'fa fa-bar-chart', title: 'Game statistics', action: () => this.$router.push('/statistics') },
+        // { icon: 'fa fa-bar-chart', title: 'Game statistics', action: () => this.$router.push({ name: 'StatisticsScreen' }) },
       ]
     }
   },
