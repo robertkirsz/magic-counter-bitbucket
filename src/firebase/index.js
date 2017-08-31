@@ -69,11 +69,15 @@ export const firebaseUpdateData = (table, id, data) =>
     .catch(response => ({ error: response.message }))
 
 // 'On' listener
-export const firebaseListener = (table, id, callback) =>
+export const addFirebaseListener = (table, id, callback) =>
   database
     .ref(table)
     .child(id)
     .on('value', snapshot => callback(snapshot.val()))
+
+// 'Off' listener
+export const removeFirebaseListener = (table, id) =>
+  database.ref(table).child(id).off()
 
 // ---------- AUTHENTICATION ----------
 
@@ -122,6 +126,7 @@ export const updateProfile = userProfile =>
       }
     )
 
+// TODO: check if needed
 export const updateEmail = email =>
   auth.currentUser.updateEmail(email).then(
     () => {

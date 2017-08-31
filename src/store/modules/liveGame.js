@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 import * as types from '@/store/mutation-types'
-import { firebaseGetData, firebaseSetData, firebaseUpdateData, firebaseListener } from '@/firebase'
+import { firebaseGetData, firebaseSetData, firebaseUpdateData, addFirebaseListener, removeFirebaseListener } from '@/firebase'
 
 const getInitialState = () => ({
   // Requests
@@ -79,8 +79,7 @@ const mutations = {
 // TODO: when user has game created and refreshes on http://localhost:8080/#/live, the screen
 //       with input is visible for a while
 // TODO: perhaps if user leaves his game, ownership should be passed on to another player?
-// TODO: add "off" firebase listener when user leaves or destroys a game, or a game gets
-// destroyed for a joined user
+// TODO: add "off" firebase listener when a game gets destroyed for a joined user
 // localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
 // let savedGameState = JSON.parse(localStorage.getItem('MtgCounterGameState'))
 // BUG: join a game, destroy it as the owner, create game with the same name, joined user will automatically rejoin
@@ -128,7 +127,7 @@ const actions = {
       })
 
     // Add database listener on that game data
-    firebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
+    addFirebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
   },
   async joinLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
@@ -169,13 +168,14 @@ const actions = {
       })
 
     // Add database listener on that game data
-    firebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
+    addFirebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
   },
   async destroyLiveGame ({ commit, state, getters, dispatch }) {
     // Stop if there is no game data or if the user is not that game's owner
     if (!getters.isLiveGame || !getters.userIsOwner) return
 
     commit(types.DESTROY_LIVE_GAME_REQUEST)
+    await removeFirebaseListener('LiveGames', state.name)
     await firebaseSetData('LiveGames', state.name, null)
     commit(types.DESTROY_LIVE_GAME_SUCCESS)
     // TODO: do this on the server?
@@ -196,7 +196,10 @@ const actions = {
     // Update game data in the database
     firebaseUpdateData('LiveGames', state.name, gameData)
       // Finish request
-      .then(response => commit(types.LEAVE_LIVE_GAME_SUCCESS, response))
+      .then(async response => {
+        await removeFirebaseListener('LiveGames', state.name)
+        commit(types.LEAVE_LIVE_GAME_SUCCESS, response)
+      })
       // Show error if thrown
       .catch(error => {
         commit(types.LEAVE_LIVE_GAME_FAIL)
