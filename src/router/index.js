@@ -15,12 +15,13 @@ const LiveGame = cb => require(['@/routes/LiveGame.vue'], cb)
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
       name: 'CounterScreen',
       component: CounterScreen,
-      beforeEnter: (to, from, next) => checkAuth(to, from, next),
+      beforeEnter: (to, from, next) => authenticate(to, from, next),
       children: [
         {
           path: 'dice',
@@ -55,34 +56,43 @@ export default new Router({
   ]
 })
 
-// TODO: move somewhere else?
-const addAuthChangeListener = () =>
-  new Promise(resolve => {
-    if (store.state.session.firebaseAuthenticated) {
-      resolve(store.state.session.signedIn)
-      return
-    }
-
-    log('beforeEnter: addAuthChangeListener request')
-    auth.onAuthStateChanged(firebaseUser => {
-      log('beforeEnter: addAuthChangeListener response')
-      store.dispatch('firebaseAuthenticate', firebaseUser)
-      resolve(!!firebaseUser)
-    })
-  })
-
-const checkAuth = async (to, from, next) => {
-  log(`beforeEnter: checkAuth - ${from.name} => ${to.name}`)
-  await addAuthChangeListener()
+// Makes sure the user is authenticated
+const authenticate = async (to, from, next) => {
+  log(`beforeEnter: authenticate - ${from.name} => ${to.name}`)
+  await checkAuth()
   next()
 }
 
+// Allows only not logged-in users
 const allowIfUnauth = async (to, from, next) => {
   log(`beforeEnter: allowIfUnauth - ${from.name} => ${to.name}`)
-  next(await addAuthChangeListener())
+  next(await checkAuth())
 }
 
+// Allows only logged-in users
 const allowIfAuth = async (to, from, next) => {
   log(`beforeEnter: allowIfAuth - ${from.name} => ${to.name}`)
-  next(!await addAuthChangeListener())
+  next(!await checkAuth())
 }
+
+// Returns user's sign-in status
+const checkAuth = () => new Promise(resolve => {
+  log('beforeEnter: checkAuth')
+  // Check if authentication process was already done
+  if (store.state.session.firebaseAuthenticated) {
+    // If yes, then return user's sign-in status
+    resolve(store.state.session.signedIn)
+    return
+  }
+  // If authentication was now done already - do it now
+  addAuthListener().then(resolve)
+})
+
+// Adds Firebase authentication listener
+const addAuthListener = () => new Promise(resolve => {
+  log('beforeEnter: addAuthListener')
+  auth.onAuthStateChanged(firebaseUser => {
+    store.dispatch('firebaseAuthenticate', firebaseUser)
+    resolve(!!firebaseUser)
+  })
+})
