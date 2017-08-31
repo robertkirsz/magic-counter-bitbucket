@@ -15,37 +15,38 @@ export default {
     signingIn () { return this.$store.state.session.signingIn },
     signingUp () { return this.$store.state.session.signingUp },
     signingInProvider () { return this.$store.state.session.signingInProvider },
-    loading () { return this.firebaseAuthenticating || this.signingIn || this.signingUp || this.signingInProvider },
+    joiningGame () { return this.$store.state.liveGame.joining },
+    loading () { return this.firebaseAuthenticating || this.signingIn || this.signingUp || this.signingInProvider || this.joiningGame },
     semi () { return this.signingIn || this.signingUp || this.signingInProvider },
-    opaque () { return this.firebaseAuthenticating },
+    opaque () { return this.firebaseAuthenticating || this.joiningGame },
     className () { return { opaque: this.opaque, semi: this.semi } }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.spinner-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
-  z-index: 1000;
-  transition: opacity .3s;
-  &.opaque { background: white; }
-  &.semi { background: rgba(white, 0.75); }
+  .spinner-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 1000;
+    transition: opacity .3s ease .3s;
+    &.opaque { background: white; }
+    &.semi { background: rgba(white, 0.75); }
 
-  .md-spinner {
-    transform: scale(1);
-    transition: transform .3s;
+    .md-spinner {
+      transform: scale(1);
+      transition: transform .3s;
+    }
   }
-}
 
-.spinner-transition-enter,
-.spinner-transition-leave-active {
-  opacity: 0;
-  & .md-spinner {
-    transform: scale(0);
+  .spinner-transition-enter,
+  .spinner-transition-leave-active {
+    opacity: 0;
+    .md-spinner {
+      transform: scale(0);
+    }
   }
-}
 </style>
