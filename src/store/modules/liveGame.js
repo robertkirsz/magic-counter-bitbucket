@@ -19,7 +19,7 @@ const getInitialState = () => ({
 const state = getInitialState()
 
 const getters = {
-  isLiveGame: (state, getters) => state.name !== null && state.owner.id !== undefined,
+  isLiveGame: (state, getters) => state.name !== null,
   userIsOwner: (state, getters, rootState, rootGetters) => state.owner.id === rootGetters.getUser.id
 }
 
@@ -68,7 +68,12 @@ const mutations = {
   },
   // Listener
   [types.SYNC_LIVE_GAME] (state, game) {
-    // TODO: maybe this can be wrote better? Some spread operator?
+    if (!game) {
+      const reset = getInitialState()
+      for (let f in state) Vue.set(state, f, reset[f])
+      return
+    }
+
     state.name = game.name
     state.owner = game.owner
     state.players = game.players
@@ -76,15 +81,8 @@ const mutations = {
   }
 }
 
-// TODO: when user has game created and refreshes on http://localhost:8080/#/live, the screen
-//       with input is visible for a while
-// TODO: perhaps if user leaves his game, ownership should be passed on to another player?
-// TODO: add "off" firebase listener when a game gets destroyed for a joined user
 // localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
 // let savedGameState = JSON.parse(localStorage.getItem('MtgCounterGameState'))
-// BUG: join a game, destroy it as the owner, create game with the same name, joined user will automatically rejoin
-// TODO: if user has 'liveGame' stored in its object, but the game got removed (for example manually from the database),
-//       clear 'liveGame' property when user logs in (it should propably be done on the server)
 
 const actions = {
   async createLiveGame ({ commit, getters, dispatch }, gameName) {
@@ -94,14 +92,6 @@ const actions = {
     // Start request
     commit(types.CREATE_LIVE_GAME_REQUEST)
 
-    // Prepare game data
-    const gameData = {
-      name: gameName,
-      owner: getters.getUser,
-      players: [{ ...getters.getUser, life: 20 }],
-      createdAt: Date.now()
-    }
-
     // Check if game with that name already exists in the database
     const existingGame = await firebaseGetData('LiveGames', gameName)
 
@@ -110,6 +100,14 @@ const actions = {
       commit(types.CREATE_LIVE_GAME_FAIL)
       commit(types.SHOW_ERROR, { message: 'Game with that name already exists' })
       return
+    }
+
+    // Prepare game data
+    const gameData = {
+      name: gameName,
+      owner: getters.getUser,
+      players: [{ ...getters.getUser, life: 20 }],
+      createdAt: Date.now()
     }
 
     // Add game data to the database
@@ -127,9 +125,16 @@ const actions = {
       })
 
     // Add database listener on that game data
-    addFirebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
+    addFirebaseListener('LiveGames', gameName, async data => {
+      commit(types.SYNC_LIVE_GAME, data)
+
+      if (!data) {
+        await removeFirebaseListener('LiveGames', gameName)
+        dispatch('updateUser', { liveGame: null })
+      }
+    })
   },
-  async joinLiveGame ({ commit, getters, dispatch }, gameName) {
+  async joinLiveGame ({ commit, getters, dispatch, rootState }, gameName) {
     // Stop if user already is taking part in a live game
     if (getters.isLiveGame) return
 
@@ -142,15 +147,22 @@ const actions = {
     // If no, show error and stop
     if (existingGame.error) {
       commit(types.JOIN_LIVE_GAME_FAIL)
-      commit(types.SHOW_ERROR, { message: 'Game not found' })
+      if (rootState.user.liveGame) {
+        commit(types.SHOW_ERROR, { message: `Game ${gameName} no longer exists` })
+        dispatch('updateUser', { liveGame: null })
+      } else {
+        commit(types.SHOW_ERROR, { message: `Game ${gameName} not found` })
+      }
       return
     }
 
-    // Prepare game data (add user to the "players" array)
-    const playerExists = !!existingGame.data.players.find(player => player.uid === getters.getUser.uid)
-    const players = playerExists
+    // Find player's data in the players array
+    const playerInGameAlready = !!existingGame.data.players.find(player => player.id === getters.getUser.id)
+    // If it exists, do nothing. If not, add user to the players array
+    const players = playerInGameAlready
       ? [...existingGame.data.players]
       : [...existingGame.data.players, { ...getters.getUser, life: 20 }]
+      // Prepare game data
     const gameData = { ...existingGame.data, players }
 
     // Update game data in the database
@@ -159,7 +171,7 @@ const actions = {
       .then(response => {
         commit(types.JOIN_LIVE_GAME_SUCCESS, response)
         // TODO: do this on the server?
-        if (!playerExists) dispatch('updateUser', { liveGame: gameName })
+        if (!playerInGameAlready) dispatch('updateUser', { liveGame: gameName })
       })
       // Show error if thrown
       .catch(error => {
@@ -168,7 +180,14 @@ const actions = {
       })
 
     // Add database listener on that game data
-    addFirebaseListener('LiveGames', gameName, data => commit(types.SYNC_LIVE_GAME, data))
+    addFirebaseListener('LiveGames', gameName, async data => {
+      commit(types.SYNC_LIVE_GAME, data)
+
+      if (!data) {
+        await removeFirebaseListener('LiveGames', gameName)
+        dispatch('updateUser', { liveGame: null })
+      }
+    })
   },
   async destroyLiveGame ({ commit, state, getters, dispatch }) {
     // Stop if there is no game data or if the user is not that game's owner
@@ -181,7 +200,7 @@ const actions = {
     // TODO: do this on the server?
     dispatch('updateUser', { liveGame: null })
   },
-  leaveLiveGame ({ commit, state, getters, rootGetters }) {
+  leaveLiveGame ({ commit, state, getters, dispatch, rootGetters }) {
     // Stop if there is no game data or if the user is that game's owner
     if (!getters.isLiveGame || getters.userIsOwner) return
 
@@ -199,6 +218,8 @@ const actions = {
       .then(async response => {
         await removeFirebaseListener('LiveGames', state.name)
         commit(types.LEAVE_LIVE_GAME_SUCCESS, response)
+        // TODO: do this on the server?
+        dispatch('updateUser', { liveGame: null })
       })
       // Show error if thrown
       .catch(error => {
