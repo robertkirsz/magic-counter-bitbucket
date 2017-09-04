@@ -8,7 +8,9 @@
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
     "build": "node build/build.js",
-    "lint": "eslint --ext .js,.vue src"
+    "lint": "eslint --ext .js,.vue src",
+    "generate-stats": "webpack --config ./build/webpack.prod.conf.js --profile --json > stats.json",
+    "show-stats": "webpack-bundle-analyzer ./stats.json ./dist"
   },
   "dependencies": {
     "firebase": "^4.3.0",
