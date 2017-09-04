@@ -52,6 +52,10 @@ export default new Router({
       name: 'LiveGame',
       component: LiveGame,
       beforeEnter: (to, from, next) => allowIfUnauth(to, from, next)
+    },
+    {
+      path: '*',
+      redirect: '/'
     }
   ]
 })
