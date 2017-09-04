@@ -11,9 +11,10 @@
 <script>
 // TODO: remove "Animated.css" when it's no longer needed
 import UserMenuButton from '@/components/UserMenuButton'
-import ErrorModal from '@/components/ErrorModal'
 import SpinnerHandler from '@/components/SpinnerHandler'
 import Redirector from '@/components/Redirector'
+
+const ErrorModal = cb => require(['@/components/ErrorModal.vue'], cb)
 
 export default {
   name: 'App',
