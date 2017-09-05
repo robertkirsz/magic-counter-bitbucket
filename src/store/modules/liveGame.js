@@ -20,6 +20,7 @@ const state = getInitialState()
 
 const getters = {
   isLiveGame: (state, getters) => state.name !== null,
+  // gameData: state => ({ name: state.name, owner: state.owner, players: state.players }),
   userIsOwner: (state, getters, rootState, rootGetters) => state.owner.id === rootGetters.getUser.id,
   userLivePlayer: (state, getters, rootState, rootGetters) => state.players.find(player => player.id === rootGetters.getUser.id),
   userLivePlayerIndex: (state, getters, rootState, rootGetters) => state.players.findIndex(player => player.id === rootGetters.getUser.id),
@@ -222,6 +223,28 @@ const actions = {
         dispatch('updateUser', { liveGame: null })
       }
     })
+  },
+  increaseLivePlayerLife ({ state, getters }, amount = 1) {
+    const index = getters.userLivePlayerIndex
+    const player = { ...getters.userLivePlayer }
+    const players = [...state.players]
+
+    player.life += amount
+    players.splice(index, 1, player)
+
+    // TODO: debounce this
+    firebaseUpdateData('LiveGames', state.name, { players })
+  },
+  decreaseLivePlayerLife ({ commit, getters }, amount = 1) {
+    const index = getters.userLivePlayerIndex
+    const player = { ...getters.userLivePlayer }
+    const players = [...state.players]
+
+    player.life -= amount
+    players.splice(index, 1, player)
+
+    // TODO: debounce this
+    firebaseUpdateData('LiveGames', state.name, { players })
   }
 }
 

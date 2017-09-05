@@ -29,5 +29,10 @@ export default {
 </script>
 
 <style scoped>
-  .content { padding: 8px; }
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+  }
 </style>
