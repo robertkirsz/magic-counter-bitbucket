@@ -125,14 +125,7 @@ const actions = {
       })
 
     // Add database listener on that game data
-    addFirebaseListener('LiveGames', gameName, async data => {
-      commit(types.SYNC_LIVE_GAME, data)
-
-      if (!data) {
-        await removeFirebaseListener('LiveGames', gameName)
-        dispatch('updateUser', { liveGame: null })
-      }
-    })
+    dispatch('addLiveGameListener', gameName)
   },
   async joinLiveGame ({ commit, getters, dispatch, rootState }, gameName) {
     // Stop if user already is taking part in a live game
@@ -180,14 +173,7 @@ const actions = {
       })
 
     // Add database listener on that game data
-    addFirebaseListener('LiveGames', gameName, async data => {
-      commit(types.SYNC_LIVE_GAME, data)
-
-      if (!data) {
-        await removeFirebaseListener('LiveGames', gameName)
-        dispatch('updateUser', { liveGame: null })
-      }
-    })
+    dispatch('addLiveGameListener', gameName)
   },
   async destroyLiveGame ({ commit, state, getters, dispatch }) {
     // Stop if there is no game data or if the user is not that game's owner
@@ -226,6 +212,16 @@ const actions = {
         commit(types.LEAVE_LIVE_GAME_FAIL)
         commit(types.SHOW_ERROR, { message: 'Error while leaving a game: ' + error })
       })
+  },
+  addLiveGameListener ({ commit, dispatch }, gameName) {
+    addFirebaseListener('LiveGames', gameName, async data => {
+      commit(types.SYNC_LIVE_GAME, data)
+
+      if (!data) {
+        await removeFirebaseListener('LiveGames', gameName)
+        dispatch('updateUser', { liveGame: null })
+      }
+    })
   }
 }
 
