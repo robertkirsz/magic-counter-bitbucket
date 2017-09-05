@@ -18,3 +18,9 @@ new Vue({
   template: '<App />',
   components: { App }
 })
+
+// TODO: remove "Animated.css" when it's no longer needed
+// TODO: add localstorage support
+//    localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
+//    let savedGameState = JSON.parse(localStorage.getItem('MtgCounterGameState'))
+// TODO: destroy/leave the game when user logs out

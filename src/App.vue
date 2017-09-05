@@ -9,7 +9,6 @@
 </template>
 
 <script>
-// TODO: remove "Animated.css" when it's no longer needed
 import UserMenuButton from '@/components/UserMenuButton'
 import SpinnerHandler from '@/components/SpinnerHandler'
 import Redirector from '@/components/Redirector'

@@ -81,9 +81,6 @@ const mutations = {
   }
 }
 
-// localStorage.setItem('MtgCounterGameState', JSON.stringify(state))
-// let savedGameState = JSON.parse(localStorage.getItem('MtgCounterGameState'))
-
 const actions = {
   async createLiveGame ({ commit, getters, dispatch }, gameName) {
     // Stop if user already is taking part in a live game
