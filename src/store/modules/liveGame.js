@@ -20,7 +20,10 @@ const state = getInitialState()
 
 const getters = {
   isLiveGame: (state, getters) => state.name !== null,
-  userIsOwner: (state, getters, rootState, rootGetters) => state.owner.id === rootGetters.getUser.id
+  userIsOwner: (state, getters, rootState, rootGetters) => state.owner.id === rootGetters.getUser.id,
+  userLivePlayer: (state, getters, rootState, rootGetters) => state.players.find(player => player.id === rootGetters.getUser.id),
+  userLivePlayerIndex: (state, getters, rootState, rootGetters) => state.players.findIndex(player => player.id === rootGetters.getUser.id),
+  otherLivePlayers: (state, getters, rootState, rootGetters) => state.players.filter(player => player.id !== rootGetters.getUser.id)
 }
 
 const mutations = {

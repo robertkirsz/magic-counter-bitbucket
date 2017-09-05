@@ -21,13 +21,10 @@ export default {
   name: 'LiveGameScreen',
   computed: {
     ...mapState({ liveGame: state => state.liveGame }),
-    ...mapGetters(['userIsOwner'])
+    ...mapGetters(['userIsOwner', 'userPlayer', 'otherPlayers'])
   },
   methods: {
-    ...mapActions([
-      'destroyLiveGame',
-      'leaveLiveGame'
-    ]),
+    ...mapActions(['destroyLiveGame', 'leaveLiveGame']),
     exitGame () {
       if (this.userIsOwner) this.destroyLiveGame()
       else this.leaveLiveGame()
