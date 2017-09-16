@@ -35,11 +35,13 @@
 </template>
 
 <script>
-// TODO: add icon morph to avatar button
+import { mapGetters, mapActions } from 'vuex'
 
+// TODO: add icon morph to avatar button
 export default {
   name: 'UserMenu',
   computed: {
+    ...mapGetters(['isLiveGame', 'userIsOwner']),
     signedIn () {
       return this.$store.state.session.signedIn
     },
@@ -54,14 +56,38 @@ export default {
       return [
         {
           id: 0,
+          label: 'Go back',
+          icon: 'arrow-left',
+          iconType: 'fa',
+          action: () => this.$router.push({ name: 'CounterScreen' }),
+          hidden: this.$route.name === 'CounterScreen'
+        },
+        {
+          id: 1,
+          label: 'Leave game',
+          icon: 'times',
+          iconType: 'fa',
+          action: () => this.leaveLiveGame(),
+          hidden: this.isLiveGame && this.userIsOwner
+        },
+        {
+          id: 2,
+          label: 'Stop game',
+          icon: 'times',
+          iconType: 'fa',
+          action: () => this.destroyLiveGame(),
+          hidden: this.isLiveGame && !this.userIsOwner
+        },
+        {
+          id: 3,
           label: 'Live game',
           icon: 'gamepad',
           iconType: 'fa',
           action: () => this.$router.push({ name: 'LiveGame' }),
-          hidden: !this.signedIn
+          hidden: this.$route.name === 'LiveGame' || !this.signedIn
         },
         {
-          id: 1,
+          id: 4,
           label: 'Sign in',
           icon: 'sign-in',
           iconType: 'fa',
@@ -69,7 +95,7 @@ export default {
           hidden: this.signedIn
         },
         {
-          id: 2,
+          id: 5,
           label: 'Sign out',
           icon: 'sign-out',
           iconType: 'fa',
@@ -78,6 +104,9 @@ export default {
         }
       ]
     }
+  },
+  methods: {
+    ...mapActions(['destroyLiveGame', 'leaveLiveGame'])
   }
 }
 </script>

@@ -3,14 +3,11 @@
     <p>Game name: {{ liveGame.name }}</p>
     <p>Owner: {{ liveGame.owner.name }}</p>
     <p>Players:</p>
+
     <p v-for="player in otherLivePlayers" :key="player.id">
       {{ player.name }} {{ player.life }}
     </p>
-    <md-button
-      class="md-raised md-accent"
-      @click.native="exitGame"
-      v-text="userIsOwner ? 'Destroy' : 'Leave'"
-    />
+
     <counter
       type="life"
       :value="userLivePlayer.life"
@@ -29,15 +26,9 @@ export default {
   components: { Counter },
   computed: {
     ...mapState({ liveGame: state => state.liveGame }),
-    ...mapGetters(['userIsOwner', 'userLivePlayer', 'otherLivePlayers'])
+    ...mapGetters(['userLivePlayer', 'otherLivePlayers'])
   },
-  methods: {
-    ...mapActions(['destroyLiveGame', 'leaveLiveGame', 'increaseLivePlayerLife', 'decreaseLivePlayerLife']),
-    exitGame () {
-      if (this.userIsOwner) this.destroyLiveGame()
-      else this.leaveLiveGame()
-    }
-  }
+  methods: mapActions(['increaseLivePlayerLife', 'decreaseLivePlayerLife'])
 }
 </script>
 
