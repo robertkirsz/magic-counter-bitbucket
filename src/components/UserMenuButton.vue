@@ -68,7 +68,7 @@ export default {
           icon: 'times',
           iconType: 'fa',
           action: () => this.leaveLiveGame(),
-          hidden: this.isLiveGame && this.userIsOwner
+          hidden: !this.isLiveGame || this.userIsOwner
         },
         {
           id: 2,
@@ -76,7 +76,7 @@ export default {
           icon: 'times',
           iconType: 'fa',
           action: () => this.destroyLiveGame(),
-          hidden: this.isLiveGame && !this.userIsOwner
+          hidden: !this.isLiveGame || !this.userIsOwner
         },
         {
           id: 3,
@@ -92,7 +92,7 @@ export default {
           icon: 'sign-in',
           iconType: 'fa',
           action: () => this.$router.push({ name: 'SignIn' }),
-          hidden: this.signedIn
+          hidden: this.$route.name === 'SignIn' || this.signedIn
         },
         {
           id: 5,
